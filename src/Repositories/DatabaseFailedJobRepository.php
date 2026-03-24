@@ -79,6 +79,8 @@ class DatabaseFailedJobRepository implements FailedJobRepository
      */
     public function flush(): bool
     {
-        return DB::table($this->table)->delete() !== false;
+        DB::table($this->table)->delete();
+        
+        return true;
     }
 }

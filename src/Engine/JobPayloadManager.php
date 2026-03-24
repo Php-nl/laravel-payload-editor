@@ -136,7 +136,7 @@ class JobPayloadManager
             if ($typeName !== 'string' && is_subclass_of($typeName, \UnitEnum::class)) {
                 if (is_subclass_of($typeName, \BackedEnum::class)) {
                     // Backed enum casting
-                    $castedValue = $this->castValue($newValue, (new ReflectionClass($typeName))->getBackingType()?->getName() ?? 'string');
+                    $castedValue = $this->castValue($newValue, (new \ReflectionEnum($typeName))->getBackingType()?->getName() ?? 'string');
                     $enumInstance = $typeName::tryFrom($castedValue);
                     if ($enumInstance) {
                         $property->setValue($command, $enumInstance);
