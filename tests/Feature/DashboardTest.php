@@ -4,6 +4,8 @@ namespace PhpNl\LaravelPayloadEditor\Tests\Feature;
 
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use PhpNl\LaravelPayloadEditor\Contracts\FailedJobRepository;
+use PhpNl\LaravelPayloadEditor\Engine\JobPayloadManager;
 use PhpNl\LaravelPayloadEditor\Livewire\LaravelPayloadEditorDashboard;
 use PhpNl\LaravelPayloadEditor\Tests\TestCase;
 
@@ -34,6 +36,7 @@ class DashboardTest extends TestCase
             ->assertSee('test-uuid-1234')
             ->assertSee('App\Jobs\TestJob');
     }
+
     public function test_it_can_inspect_and_retry_job()
     {
         DB::table('failed_jobs')->insert([
@@ -45,7 +48,7 @@ class DashboardTest extends TestCase
                 'job' => 'Illuminate\\Queue\\CallQueuedHandler@call',
                 'data' => [
                     'commandName' => 'App\\Jobs\\TestJob',
-                    'command' => serialize(new \stdClass()),
+                    'command' => serialize(new \stdClass),
                 ],
             ]),
             'exception' => 'Test Exception',
@@ -53,10 +56,10 @@ class DashboardTest extends TestCase
         ]);
 
         Livewire::test(LaravelPayloadEditorDashboard::class)
-            ->call('inspect', 'test-uuid-inspect', app(\PhpNl\LaravelPayloadEditor\Contracts\FailedJobRepository::class), app(\PhpNl\LaravelPayloadEditor\Engine\JobPayloadManager::class))
+            ->call('inspect', 'test-uuid-inspect', app(FailedJobRepository::class), app(JobPayloadManager::class))
             ->assertSet('errorMessage', null)
             ->assertSet('inspectingJobUuid', 'test-uuid-inspect')
-            ->call('saveAndRetry', app(\PhpNl\LaravelPayloadEditor\Contracts\FailedJobRepository::class), app(\PhpNl\LaravelPayloadEditor\Engine\JobPayloadManager::class))
+            ->call('saveAndRetry', app(FailedJobRepository::class), app(JobPayloadManager::class))
             ->assertSet('errorMessage', null)
             ->assertSet('inspectingJobUuid', null);
     }

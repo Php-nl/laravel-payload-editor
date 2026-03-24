@@ -13,8 +13,8 @@ class HorizonFailedJobRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        $this->repository = new HorizonFailedJobRepository();
+
+        $this->repository = new HorizonFailedJobRepository;
     }
 
     public function test_find_throws_exception()

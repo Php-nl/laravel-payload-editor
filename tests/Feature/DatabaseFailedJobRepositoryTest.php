@@ -3,7 +3,6 @@
 namespace PhpNl\LaravelPayloadEditor\Tests\Feature;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Artisan;
 use PhpNl\LaravelPayloadEditor\Repositories\DatabaseFailedJobRepository;
 use PhpNl\LaravelPayloadEditor\Tests\TestCase;
 
@@ -14,8 +13,8 @@ class DatabaseFailedJobRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        $this->repository = new DatabaseFailedJobRepository();
+
+        $this->repository = new DatabaseFailedJobRepository;
     }
 
     public function test_it_can_find_a_failed_job_by_uuid()
@@ -88,7 +87,7 @@ class DatabaseFailedJobRepositoryTest extends TestCase
                 'job' => 'Illuminate\\Queue\\CallQueuedHandler@call',
                 'data' => [
                     'commandName' => 'stdClass',
-                    'command' => serialize(new \stdClass()),
+                    'command' => serialize(new \stdClass),
                 ],
             ]),
             'exception' => 'Test',

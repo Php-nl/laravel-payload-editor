@@ -64,7 +64,7 @@ composer test
 ## Credits
 
 - [PHP.nl](https://php.nl)
-- [Serff Webdevelopment](https://github.com/serff)
+- [Serff Webdevelopment](https://serff-webdevelopment.nl)
 - [All Contributors](../../contributors)
 
 ## License
