@@ -29,7 +29,7 @@ Next, publish the configuration file (optional):
 php artisan vendor:publish --tag="laravel-payload-editor-config"
 ```
 
-*Note: Because Laravel Payload Editor uses Livewire 3 for its dynamic UI, ensure Livewire is installed in your application (`composer require livewire/livewire`).*
+
 
 ## Usage
 
