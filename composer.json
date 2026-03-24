@@ -1,0 +1,41 @@
+{
+    "name": "php-nl/laravel-payload-editor",
+    "description": "Laravel Payload Editor & Payload Editor for Laravel",
+    "type": "library",
+    "require": {
+        "php": "^8.3.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "livewire/livewire": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpNl\\LaravelPayloadEditor\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhpNl\\LaravelPayloadEditor\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "PhpNl\\LaravelPayloadEditor\\LaravelPayloadEditorServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "format": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=2G"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^12.5",
+        "laravel/pint": "^1.29",
+        "larastan/larastan": "^3.9"
+    }
+}
