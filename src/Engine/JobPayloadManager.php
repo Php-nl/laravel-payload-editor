@@ -9,10 +9,16 @@ class JobPayloadManager
 {
     /**
      * Unserialize the job command from the JSON payload.
+     *
+     * @throws \RuntimeException
      */
     public function unserializeCommand(string $jsonPayload): object
     {
         $payload = json_decode($jsonPayload, true);
+
+        if (! isset($payload['data']['command'])) {
+            throw new \RuntimeException('Job payload does not contain a serialized command.');
+        }
 
         return unserialize($payload['data']['command']);
     }
@@ -41,11 +47,41 @@ class JobPayloadManager
             // Handle standard ModelIdentifier for Eloquent models
             // Allowing users to adjust the ID if the wrong record was passed
             if (is_object($value) && $value instanceof ModelIdentifier) {
+                if (is_array($value->id)) {
+                    $schema[$name] = [
+                        'type' => 'ModelIdentifier (Array)',
+                        'value' => '<Array of IDs>',
+                        'editable' => false,
+                    ];
+                } else {
+                    $schema[$name] = [
+                        'type' => 'ModelIdentifier',
+                        'class' => $value->class,
+                        'value' => $value->id,
+                        'editable' => true,
+                    ];
+                }
+
+                continue;
+            }
+
+            // Handle native Enums
+            if ($typeName !== 'mixed' && is_subclass_of($typeName, \UnitEnum::class)) {
                 $schema[$name] = [
-                    'type' => 'ModelIdentifier',
-                    'class' => $value->class,
-                    'value' => $value->id,
+                    'type' => $typeName,
+                    'value' => $value instanceof \BackedEnum ? $value->value : ($value instanceof \UnitEnum ? $value->name : null),
                     'editable' => true,
+                ];
+
+                continue;
+            }
+
+            // Uninitialized objects (other than enums/identifiers) cannot be safely populated via string input
+            if (! $property->isInitialized($command) && $typeName !== 'mixed' && class_exists($typeName)) {
+                $schema[$name] = [
+                    'type' => $typeName,
+                    'value' => '<Uninitialized Object>',
+                    'editable' => false,
                 ];
 
                 continue;
@@ -83,12 +119,43 @@ class JobPayloadManager
             $property->setAccessible(true);
 
             $currentValue = $property->isInitialized($command) ? $property->getValue($command) : null;
+            $type = $property->getType();
+            $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : 'string';
 
             // Handle Eloquent ModelIdentifier
             if (is_object($currentValue) && $currentValue instanceof ModelIdentifier) {
-                $currentValue->id = $this->castValue($newValue, gettype($currentValue->id));
-                $property->setValue($command, $currentValue);
+                if (! is_array($currentValue->id)) {
+                    $currentValue->id = $this->castValue($newValue, gettype($currentValue->id));
+                    $property->setValue($command, $currentValue);
+                }
 
+                continue;
+            }
+
+            // Handle native Enums
+            if ($typeName !== 'string' && is_subclass_of($typeName, \UnitEnum::class)) {
+                if (is_subclass_of($typeName, \BackedEnum::class)) {
+                    // Backed enum casting
+                    $castedValue = $this->castValue($newValue, (new ReflectionClass($typeName))->getBackingType()?->getName() ?? 'string');
+                    $enumInstance = $typeName::tryFrom($castedValue);
+                    if ($enumInstance) {
+                        $property->setValue($command, $enumInstance);
+                    }
+                } else {
+                    // Unit enum (pure name)
+                    foreach ($typeName::cases() as $case) {
+                        if ($case->name === $newValue) {
+                            $property->setValue($command, $case);
+                            break;
+                        }
+                    }
+                }
+
+                continue;
+            }
+
+            // Skip uninitialized complex objects
+            if (! $property->isInitialized($command) && class_exists($typeName)) {
                 continue;
             }
 
@@ -96,9 +163,6 @@ class JobPayloadManager
             if (! is_scalar($currentValue) && ! is_null($currentValue)) {
                 continue;
             }
-
-            $type = $property->getType();
-            $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : 'string';
 
             $property->setValue($command, $this->castValue($newValue, $typeName));
         }

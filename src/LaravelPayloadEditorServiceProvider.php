@@ -8,7 +8,6 @@ use Livewire\Livewire;
 use PhpNl\LaravelPayloadEditor\Contracts\FailedJobRepository;
 use PhpNl\LaravelPayloadEditor\Livewire\LaravelPayloadEditorDashboard;
 use PhpNl\LaravelPayloadEditor\Repositories\DatabaseFailedJobRepository;
-use PhpNl\LaravelPayloadEditor\Repositories\HorizonFailedJobRepository;
 
 class LaravelPayloadEditorServiceProvider extends ServiceProvider
 {
@@ -20,10 +19,7 @@ class LaravelPayloadEditorServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/laravel-payload-editor.php', 'laravel-payload-editor');
 
         $this->app->bind(FailedJobRepository::class, function ($app) {
-            return match ($app['config']->get('laravel-payload-editor.driver')) {
-                'horizon' => new HorizonFailedJobRepository,
-                default => new DatabaseFailedJobRepository,
-            };
+            return new DatabaseFailedJobRepository;
         });
     }
 

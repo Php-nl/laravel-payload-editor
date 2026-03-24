@@ -1,6 +1,6 @@
 {
     "name": "php-nl/laravel-payload-editor",
-    "description": "Laravel Payload Editor & Payload Editor for Laravel",
+    "description": "Laravel Payload Editor",
     "type": "library",
     "license": "MIT",
     "require": {

@@ -7,13 +7,17 @@ return [
     | Failed Job Storage Driver
     |--------------------------------------------------------------------------
     |
-    | Laravel Payload Editor can read and write to different fail drivers. Standard is
-    | 'database', which reads from your `failed_jobs` table. Set to 'horizon'
-    | if you exclusively use Horizon's Redis fail driver (experimental).
+    /*
+    |--------------------------------------------------------------------------
+    | Failed Job Storage Driver
+    |--------------------------------------------------------------------------
+    |
+    | Laravel Payload Editor reads from your `failed_jobs` table using the 'database'
+    | driver by default.
     |
     */
 
-    'driver' => env('JOB_AUTOPSY_DRIVER', 'database'),
+    'driver' => env('PAYLOAD_EDITOR_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +30,7 @@ return [
     |
     */
 
-    'domain' => env('JOB_AUTOPSY_DOMAIN', null),
+    'domain' => env('PAYLOAD_EDITOR_DOMAIN', null),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,7 +43,7 @@ return [
     |
     */
 
-    'path' => env('JOB_AUTOPSY_PATH', 'laravel-payload-editor'),
+    'path' => env('PAYLOAD_EDITOR_PATH', 'laravel-payload-editor'),
 
     /*
     |--------------------------------------------------------------------------

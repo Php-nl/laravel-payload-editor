@@ -28,13 +28,24 @@ class DatabaseFailedJobRepository implements FailedJobRepository
     }
 
     /**
-     * Retrieve a paginated list of failed jobs.
+     * Retrieve a paginated list of failed jobs, optionally filtered by a search query.
      *
      * @return LengthAwarePaginator
      */
-    public function paginate(int $perPage = 15): mixed
+    public function paginate(int $perPage = 15, string $search = ''): mixed
     {
-        return DB::table($this->table)->orderByDesc('failed_at')->paginate($perPage);
+        $query = DB::table($this->table)->orderByDesc('failed_at');
+
+        if (! empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('uuid', 'like', "%{$search}%")
+                    ->orWhere('queue', 'like', "%{$search}%")
+                    ->orWhere('payload', 'like', "%{$search}%")
+                    ->orWhere('exception', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -53,5 +64,21 @@ class DatabaseFailedJobRepository implements FailedJobRepository
     public function retry(string $uuid): bool
     {
         return Artisan::call('queue:retry', ['id' => $uuid]) === 0;
+    }
+
+    /**
+     * Delete a failed job by its UUID.
+     */
+    public function delete(string $uuid): bool
+    {
+        return DB::table($this->table)->where('uuid', $uuid)->delete() > 0;
+    }
+
+    /**
+     * Delete all failed jobs from the repository.
+     */
+    public function flush(): bool
+    {
+        return DB::table($this->table)->delete() !== false;
     }
 }

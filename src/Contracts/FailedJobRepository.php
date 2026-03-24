@@ -10,9 +10,9 @@ interface FailedJobRepository
     public function find(string $uuid): ?object;
 
     /**
-     * Retrieve a paginated list of failed jobs.
+     * Retrieve a paginated list of failed jobs, optionally filtered by a search query.
      */
-    public function paginate(int $perPage = 15): mixed;
+    public function paginate(int $perPage = 15, string $search = ''): mixed;
 
     /**
      * Update the payload of a failed job.
@@ -23,4 +23,14 @@ interface FailedJobRepository
      * Retry a failed job.
      */
     public function retry(string $uuid): bool;
+
+    /**
+     * Delete a failed job by its UUID.
+     */
+    public function delete(string $uuid): bool;
+
+    /**
+     * Delete all failed jobs from the repository.
+     */
+    public function flush(): bool;
 }

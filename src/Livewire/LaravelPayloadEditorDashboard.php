@@ -2,6 +2,7 @@
 
 namespace PhpNl\LaravelPayloadEditor\Livewire;
 
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use PhpNl\LaravelPayloadEditor\Contracts\FailedJobRepository;
@@ -10,6 +11,11 @@ use PhpNl\LaravelPayloadEditor\Engine\JobPayloadManager;
 class LaravelPayloadEditorDashboard extends Component
 {
     use WithPagination;
+
+    #[Url]
+    public string $search = '';
+
+    public array $selectedJobs = [];
 
     public ?string $inspectingJobUuid = null;
 
@@ -20,6 +26,11 @@ class LaravelPayloadEditorDashboard extends Component
     public array $form = [];
 
     public ?string $errorMessage = null;
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     public function inspect(string $uuid, FailedJobRepository $repository, JobPayloadManager $manager)
     {
@@ -79,13 +90,48 @@ class LaravelPayloadEditorDashboard extends Component
         }
     }
 
+    public function retryJob(string $uuid, FailedJobRepository $repository)
+    {
+        $repository->retry($uuid);
+        session()->flash('success', 'Job queued for retry!');
+    }
+
+    public function deleteJob(string $uuid, FailedJobRepository $repository)
+    {
+        $repository->delete($uuid);
+        $this->selectedJobs = array_diff($this->selectedJobs, [$uuid]);
+        session()->flash('success', 'Job permanently deleted.');
+    }
+
+    public function flushJobs(FailedJobRepository $repository)
+    {
+        $repository->flush();
+        $this->selectedJobs = [];
+        $this->resetPage();
+        session()->flash('success', 'All failed jobs have been flushed.');
+    }
+
+    public function retrySelected(FailedJobRepository $repository)
+    {
+        if (empty($this->selectedJobs)) {
+            return;
+        }
+
+        foreach ($this->selectedJobs as $uuid) {
+            $repository->retry($uuid);
+        }
+
+        $this->selectedJobs = [];
+        session()->flash('success', 'Selected jobs queued for retry!');
+    }
+
     public function render(FailedJobRepository $repository)
     {
         /** @var view-string $view */
         $view = 'laravel-payload-editor::livewire.dashboard';
 
         return view($view, [
-            'jobs' => $repository->paginate(),
+            'jobs' => $repository->paginate(15, $this->search),
         ])->layout('laravel-payload-editor::layouts.app');
     }
 }
