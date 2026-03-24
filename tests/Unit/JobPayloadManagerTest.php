@@ -3,6 +3,7 @@
 namespace PhpNl\LaravelPayloadEditor\Tests\Unit;
 
 use Illuminate\Contracts\Database\ModelIdentifier;
+use Illuminate\Foundation\Auth\User;
 use PhpNl\LaravelPayloadEditor\Engine\JobPayloadManager;
 use PhpNl\LaravelPayloadEditor\Tests\TestCase;
 
@@ -103,8 +104,8 @@ class AdvancedDummyJob
         $this->unit = TestUnitEnum::Draft;
         $this->backed = TestBackedEnum::Pending;
 
-        $this->identifier = new ModelIdentifier('App\\Models\\User', 1, [], null);
-        $this->arrayIdentifier = new ModelIdentifier('App\\Models\\User', [1, 2, 3], [], null);
+        $this->identifier = new ModelIdentifier(User::class, 1, [], null);
+        $this->arrayIdentifier = new ModelIdentifier(User::class, [1, 2, 3], [], null);
     }
 }
 
