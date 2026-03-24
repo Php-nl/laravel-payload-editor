@@ -80,7 +80,7 @@ class DatabaseFailedJobRepository implements FailedJobRepository
     public function flush(): bool
     {
         DB::table($this->table)->delete();
-        
+
         return true;
     }
 }
